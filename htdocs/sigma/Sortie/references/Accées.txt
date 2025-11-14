@@ -1,0 +1,6 @@
+rôle d'animateur :465177 
+Salle : 09
+Transmettre chaque jour, la liste des absents sur votre cours avec les mentions No _ prénom_ cours_salle à
+Les Absences seront envoyé à cette adresse email : absence@doranco.com
+/***** Démarrage de Projet Symfony *****/
+php -S localhost:8000 -t public

@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    image: xampp-docker-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./htdocs:/var/www/html
+    environment:
+      APACHE_DOCUMENT_ROOT: /var/www/html
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: tpc
+      DB_USER: tpc_user
+      DB_PASSWORD: secret
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tpc
+      MYSQL_USER: tpc_user
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db
+
+volumes:
+  db_data:

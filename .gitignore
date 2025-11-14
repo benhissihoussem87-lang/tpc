@@ -1,0 +1,13 @@
+# OS / Editor noise
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# Docker artifacts
+db_data/
+*.iml
+
+# Local backups or temp exports
+db/init/Backups/

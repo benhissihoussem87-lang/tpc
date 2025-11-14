@@ -1,0 +1,4 @@
+FROM php:8.2-apache
+
+# Enable mod_rewrite and install PDO MySQL extension required by the app
+RUN a2enmod rewrite && docker-php-ext-install pdo_mysql

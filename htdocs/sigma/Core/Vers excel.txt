@@ -1,0 +1,6 @@
+1- Dans la page Appel_offres/getAppelsOffres.php. Ajouter à la ligne 183-184...
+                          <!--  Export Excel -->
+			  <td><a href="Core/Export.php?tableName=offres" style="width:220px; ; margin:auto;position:relative; top:0px;"   class="btn btn-primary btn-block" >Export Excel</a></td>
+			 
+			  <td>
+2- Copier le dossier Core dans C:\wamp\www\sigma
