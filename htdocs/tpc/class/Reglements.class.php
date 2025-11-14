@@ -5,7 +5,31 @@ class Reglements{
 	public function __construct(){$this->cnx=connexion();}
 	
 	
+    private function normalizeDecimal($value) {
+        return ($value === '' || $value === null) ? null : (float)$value;
+    }
+
+    private function normalizeString($value) {
+        $value = isset($value) ? trim((string)$value) : '';
+        return ($value === '') ? null : $value;
+    }
+
+    private function normalizeDate($value) {
+        $value = isset($value) ? trim((string)$value) : '';
+        return ($value === '') ? null : $value;
+    }
+
     public function Ajout($client,$facture,$prix_ttc,$etat_reglement,$num_cheque,$date_cheque,$retenue_cheque,$reglementEspece,$montant,$dateReglement,$pieceRs){
+        $prix_ttc = $this->normalizeDecimal($prix_ttc);
+        $montant  = $this->normalizeDecimal($montant);
+        $retenue_cheque = $this->normalizeDate($retenue_cheque);
+        $date_cheque    = $this->normalizeDate($date_cheque);
+        $dateReglement  = $this->normalizeDate($dateReglement);
+        $etat_reglement = $this->normalizeString($etat_reglement);
+        $num_cheque     = $this->normalizeString($num_cheque);
+        $reglementEspece= $this->normalizeString($reglementEspece);
+        $pieceRs        = $this->normalizeString($pieceRs);
+
         // Explicit columns; let id_reglement auto-increment
         $sql = "INSERT INTO reglement (`client`,`num_fact`,`prix_ttc`,`etat_reglement`,`num_cheque`,`date_cheque`,`retenue_date`,`TypeReglement`,`montant`,`dateReglement`,`pieceRs`)
                 VALUES (:client,:facture,:prix_ttc,:etat_reglement,:num_cheque,:date_cheque,:retenue_date,:TypeReglement,:montant,:dateReglement,:pieceRs)";
@@ -82,6 +106,16 @@ class Reglements{
 	}
 /******************************** Archive ::::: **************/
 public function AjoutArchive($client,$facture,$prix_ttc,$etat_reglement,$num_cheque,$date_cheque,$retenue_cheque,$reglementEspece,$montant,$dateReglement,$pieceRs){
+        $prix_ttc = $this->normalizeDecimal($prix_ttc);
+        $montant  = $this->normalizeDecimal($montant);
+        $retenue_cheque = $this->normalizeDate($retenue_cheque);
+        $date_cheque    = $this->normalizeDate($date_cheque);
+        $dateReglement  = $this->normalizeDate($dateReglement);
+        $etat_reglement = $this->normalizeString($etat_reglement);
+        $num_cheque     = $this->normalizeString($num_cheque);
+        $reglementEspece= $this->normalizeString($reglementEspece);
+        $pieceRs        = $this->normalizeString($pieceRs);
+
         // Explicit columns for archive_reglement; let id auto-increment
         $sql = "INSERT INTO archive_reglement (`client`,`num_fact_archive`,`prix_ttc`,`etat_reglement`,`num_cheque`,`date_cheque`,`retenue_date`,`TypeReglement`,`montant`,`dateReglement`,`pieceRs`)
                 VALUES (:client,:num_fact_archive,:prix_ttc,:etat_reglement,:num_cheque,:date_cheque,:retenue_date,:TypeReglement,:montant,:dateReglement,:pieceRs)";

@@ -1,5 +1,6 @@
 <?php
 include_once 'class/Avoir.class.php';
+include_once 'class/Factures.class.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $info = $id > 0 ? $avoir->getById($id) : null;
@@ -7,6 +8,8 @@ if (!$info) {
     echo '<div class="alert alert-danger">Avoir introuvable.</div>';
     return;
 }
+
+$facturesClass = new Factures();
 
 // Safe defaults and mapping to the template inputs
 $infosAvoir = [
@@ -22,14 +25,48 @@ $infosAvoir = [
 
 $date = date('d/m/Y', strtotime($info['date_avoir']));
 
-// Rows source: if bound to a facture, we can emit a single summary line
-$ProjetsAvoir = [
-    [
-        'designation' => 'AVOIR SUR '. ($info['num_fact'] ? ('FACTURE '.$info['num_fact']) : 'OPÉRATION'),
-        'qte' => 1,
-        'pu'  => (float)$info['total_ht'],
-    ],
-];
+$ProjetsAvoir = [];
+if (!empty($info['num_fact'])) {
+    $sourceLines = $facturesClass->get_AllProjets_ByFacture($info['num_fact']);
+    foreach ($sourceLines as $line) {
+        $labelParts = [];
+        $labelParts[] = 'AVOIR SUR FACTURE '.$info['num_fact'];
+        if (!empty($line['projet_classement'])) {
+            $labelParts[] = $line['projet_classement'];
+        }
+        if (!empty($line['adresseClient'])) {
+            $labelParts[] = $line['adresseClient'];
+        }
+
+        $designation = implode(' - ', array_filter($labelParts));
+
+        $qte = (isset($line['qte']) && is_numeric($line['qte'])) ? (float)$line['qte'] : 1;
+        $pu  = (isset($line['prix_unit_htv']) && is_numeric($line['prix_unit_htv'])) ? (float)$line['prix_unit_htv'] : 0;
+        $forfait = (isset($line['prixForfitaire']) && is_numeric($line['prixForfitaire'])) ? (float)$line['prixForfitaire'] : null;
+
+        if ($forfait !== null && $forfait > 0) {
+            $qte = 1;
+            $pu  = $forfait;
+        }
+
+        $ProjetsAvoir[] = [
+            'designation' => $designation,
+            'qte' => $qte,
+            'pu'  => $pu,
+            'total_override' => ($forfait !== null && $forfait > 0) ? $forfait : null,
+        ];
+    }
+}
+
+if (empty($ProjetsAvoir)) {
+    $ProjetsAvoir = [
+        [
+            'designation' => 'AVOIR SUR '. ($info['num_fact'] ? ('FACTURE '.$info['num_fact']) : 'OPÉRATION'),
+            'qte' => 1,
+            'pu'  => (float)$info['total_ht'],
+        ],
+    ];
+}
 
 if (!function_exists('asLetters')) {
   function asLetters($number,$separateur=".") {
@@ -83,7 +120,12 @@ ob_start();
 foreach ($rows as $r){
   $q  = $r['qte'] ?? '';
   $pu = $r['pu']  ?? '';
-  $pth = (is_numeric($q) && is_numeric($pu)) ? (float)$q * (float)$pu : 0.0;
+  $override = $r['total_override'] ?? null;
+  if ($override !== null && is_numeric($override)) {
+      $pth = (float)$override;
+  } else {
+      $pth = (is_numeric($q) && is_numeric($pu)) ? (float)$q * (float)$pu : 0.0;
+  }
   $totalHT += $pth;
   $desc = $r['designation'] ?? '';
   echo '<tr class="item-row">';
